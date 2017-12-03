@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace Email.Svc.Services.Scheduling {
 
-    interface IScheduledTask {
+    public interface IScheduledTask {
         string Schedule { get; }
         Task ExecuteAsync(CancellationToken cancellationToken);
     }
