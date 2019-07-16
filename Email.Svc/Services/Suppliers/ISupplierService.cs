@@ -1,12 +1,13 @@
 ﻿using System.Threading.Tasks;
-using Email.Svc.Models;
+using Email.EntityFramework.Models;
 
 namespace Email.Svc.Services.Suppliers {
 
     public interface ISupplierService {
         Task<Supplier> GetSupplier(string address);
 
-        Task<Supplier> NewSupplier(string address, string mailHost);
+        Task<PriceList> GetPriceList(string fileName);
+
     }
 
-}
+ }

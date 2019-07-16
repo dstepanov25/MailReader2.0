@@ -1,9 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 using System;
 using System.Collections.Generic;
 
-namespace Email.Svc.Migrations
+namespace Email.EntityFramework.Migrations
 {
     public partial class InitialCreate : Migration
     {
@@ -14,11 +13,12 @@ namespace Email.Svc.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                        .Annotation("Sqlite:Autoincrement", true),
                     City = table.Column<string>(nullable: true),
                     Contacts = table.Column<string>(nullable: true),
                     Country = table.Column<string>(nullable: true),
                     Emails = table.Column<string>(nullable: true),
+                    IsNew = table.Column<bool>(nullable: false),
                     Name = table.Column<string>(nullable: true)
                 },
                 constraints: table =>

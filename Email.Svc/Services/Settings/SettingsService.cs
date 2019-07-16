@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Email.Svc.Models;
+using Email.Svc.Services.Settings.Dto;
 using MongoDB.Driver;
 using MongoDB.Bson;
 
@@ -22,9 +22,9 @@ namespace Email.Svc.Services.Settings {
             _mongoDb = mongoDb;
         }
 
-        public async Task<IEnumerable<MailAccount>> GetEmailAccounts() {
+        public async Task<IEnumerable<MailAccountDto>> GetEmailAccounts() {
             var response = await _mongoDb.GetCollection<BsonDocument>(MailSettingsCollection).FindAsync("{}");
-            return response.ToList().Select(d => new MailAccount {
+            return response.ToList().Select(d => new MailAccountDto {
                 ConnectSsl = d[ConnectSslFieldName].AsString,
                 UserName = d[UserNameFieldName].AsString,
                 Password = d[PasswordFieldName].AsString

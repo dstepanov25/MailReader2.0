@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Email.Svc.Models;
 using Email.Svc.Services.Mailbox.Dto;
+using Email.Svc.Services.Settings.Dto;
 using MailKit;
 using MailKit.Net.Imap;
 using MimeKit;
@@ -12,7 +12,7 @@ namespace Email.Svc.Services.Mailbox {
     public class MailService : IMailService {
         private readonly string[] _accessibleExtension = {".xls", ".zip", ".rar", ".xlsx"};
 
-        public IEnumerable<MailDto> ReadMessages(MailAccount mailAccountInput) {
+        public IEnumerable<MailDto> ReadMessages(MailAccountDto mailAccountInput) {
             var mailDtoList = new List<MailDto>();
             using (var client = GetImapConnection(mailAccountInput)) {
                 var inbox = client.Inbox;
@@ -25,7 +25,7 @@ namespace Email.Svc.Services.Mailbox {
                     var attachments = GetAttachmentsFromMail(message);
 
                     mailDtoList.Add(new MailDto {
-                        From = string.Join("|", message.From),
+                        From = ((MailboxAddress)message.From[0]).Address,
                         Subject = message.Subject,
                         Attachments = attachments
                     });
@@ -69,7 +69,7 @@ namespace Email.Svc.Services.Mailbox {
         }
 
 
-        private ImapClient GetImapConnection(MailAccount mailAccountInput) {
+        private ImapClient GetImapConnection(MailAccountDto mailAccountInput) {
             var client = new ImapClient {
                 ServerCertificateValidationCallback = (s, c, h, e) => true
             };

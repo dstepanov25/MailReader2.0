@@ -2,14 +2,15 @@
 using System.Collections.Specialized;
 using System.Linq;
 using System.Threading.Tasks;
+using Email.EntityFramework;
 using Email.Svc.Constants;
-using Email.Svc.Models;
 using Email.Svc.Services.Mailbox;
 using Email.Svc.Services.Scheduling;
 using Email.Svc.Services.Settings;
 using Email.Svc.Services.Suppliers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
@@ -59,9 +60,8 @@ namespace Email.Svc {
             services.AddSingleton<IMailService, MailService>();
             services.AddSingleton<ISettingsService, SettingsService>();
 
-            //var connection = @"Data Source=c:\Sample.db";
-            //services.AddDbContext<EmailContext>(options => options.UseSqlServer(connection));
-            services.AddEntityFrameworkSqlite().AddDbContext<EmailContext>();
+            services.AddEntityFrameworkSqlite()
+                    .AddDbContext<EmailContext>(options => options.UseSqlite(Configuration.GetConnectionString("SqliteConnection")),ServiceLifetime.Singleton);
             services.AddSingleton<ISupplierService, SupplierService>();
 
             services.UseQuartz(typeof(ReadEmailsJob));
@@ -84,24 +84,29 @@ namespace Email.Svc {
 
             app.UseMvc();
 
-            
+
             var scheduler = serviceProvider.GetService<IScheduler>();
 
             QuartzServicesUtilities.StartJob<ReadEmailsJob>(scheduler, new TimeSpan(0,1,0));
 
-            using (var client = new EmailContext())
-            {
-                client.Database.EnsureCreated();
-            }
-            //var _settingsService = serviceProvider.GetService<ISettingsService>();
-            //var _mailService = serviceProvider.GetService<IMailService>();
 
-            //var emailAccounts = _settingsService.GetEmailAccounts().Result;
-            //foreach (var emailAccount in emailAccounts)
-            //{
-            //    _mailService.GetMessages(emailAccount);
-            //}
-        }
+            using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>()
+                .CreateScope()) {
+                var db = serviceScope.ServiceProvider.GetService<EmailContext>();
+                db.Database.EnsureCreated();
+            }
+            
+
+
+                //var _settingsService = serviceProvider.GetService<ISettingsService>();
+                //var _mailService = serviceProvider.GetService<IMailService>();
+
+                //var emailAccounts = _settingsService.GetEmailAccounts().Result;
+                //foreach (var emailAccount in emailAccounts)
+                //{
+                //    _mailService.GetMessages(emailAccount);
+                //}
+            }
 
         private async Task ScheduleJobs() {
             // Grab the Scheduler instance from the Factory
